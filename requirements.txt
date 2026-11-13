@@ -1,0 +1,17 @@
+# ==============================================================================
+# Industrial AI Quality Control & Automated Sorting System
+# Core Production Dependencies (Pinned Versions)
+# ==============================================================================
+
+# Core Vision & Deep Learning Inference Engine
+numpy==2.5.4
+opencv-python==5.0.0.93
+onnxruntime==1.31.1
+Pillow==13.0.0
+pandas==3.1.1
+
+# Industrial PLC & Modbus TCP Automation
+pymodbus==3.16.2
+
+# Vision Model Training & Conversion Utilities
+ultralytics==8.4.212

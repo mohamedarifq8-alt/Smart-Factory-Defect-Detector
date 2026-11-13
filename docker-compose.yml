@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  industrial-qc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: industrial-qc-system:latest
+    container_name: industrial_qc_dashboard
+    restart: unless-stopped
+
+    # Host networking allows direct, low-latency Modbus TCP communication with plant PLCs
+    network_mode: "host"
+
+    # Forward X11 GUI display to host workstation
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - PYTHONUNBUFFERED=1
+
+    # Mount persistent host directories for inspection logs and defect records
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ./defect_records:/app/defect_records
+      - ./quality_inspection_log.csv:/app/quality_inspection_log.csv
+
+    # Passthrough industrial USB / V4L2 video cameras
+    # (Comment out or modify device index if physical camera is not attached)
+    devices:
+      - /dev/video0:/dev/video0
