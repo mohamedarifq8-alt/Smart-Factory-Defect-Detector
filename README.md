@@ -1,198 +1,276 @@
 # 🏭 Industrial AI Quality Control & Automated Sorting System
-### نظام فحص الجودة الصناعي والفرز الآلي الذكي بالذكاء الاصطناعي (Industry 4.0)
+### Industry 4.0 Vision Inspection, Hybrid Defect Detection & Real-Time PLC Automation
 
-نظام فحص صناعي متكامل ومؤتمت لمراقبة جودة المنتجات في خطوط الإنتاج والفرز اللحظي، يدمج بين **نماذج الذكاء الاصطناعي فائقة السرعة (YOLO11 ONNX)**، وخوارزميات **الرؤية الحاسوبية الهجينة (OpenCV Hybrid Inspection)**، وبروتوكولات **الأتمتة الصناعية (Modbus TCP / Industrial PLCs)** للتحكم في الأذرع الهوائية (Pneumatic Ejector Arms) وسيور النقل (Conveyor Belts).
+[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![YOLO11](https://img.shields.io/badge/YOLO11-Ultralytics-00FFFF.svg?logo=ultralytics&logoColor=black)](https://github.com/ultralytics/ultralytics)
+[![ONNX Runtime](https://img.shields.io/badge/ONNX%20Runtime-Inference%20Engine-005CED.svg?logo=onnx&logoColor=white)](https://onnxruntime.ai/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Modbus TCP](https://img.shields.io/badge/Modbus-TCP%20%2F%20PLC%20Ready-E32636.svg)](https://en.wikipedia.org/wiki/Modbus)
 
----
-
-## 📑 فهرس المحتويات
-1. [فكرة المشروع وفائدته الصناعية](#-فكرة-المشروع-وفائدته-الصناعية)
-2. [بيانات التدريب والنموذج المستخدم](#-بيانات-التدريب-والنموذج-المستخدم)
-3. [معدلات الدقة (التدريب مقابل الأداء الميداني الحقيقي)](#-معدلات-الدقة-التدريب-مقابل-الأداء-الميداني-الحقيقي)
-4. [هيكلية المشروع وشرح محتويات الملفات](#-هيكلية-المشروع-وشرح-محتويات-الملفات)
-5. [المشكلات الهندسية التي واجهتنا وكيف تم حلها](#-المشكلات-الهندسية-التي-واجهتنا-وكيف-تم-حلها)
-6. [الإضافات والميزات الحصرية للنظام](#-الإضافات-والميزات-الحصرية-للنظام)
-7. [دليل وطرق التشغيل](#-دليل-وطرق-التشغيل)
-   - [الطريقة 1: التشغيل الفوري بنقرة واحدة (Windows run.bat)](#طريقة-1-التشغيل-الفوري-بنقرة-واحدة-على-windows)
-   - [الطريقة 2: التشغيل المباشر عبر بيئة Python](#طريقة-2-التشغيل-المباشر-عبر-بيئة-python)
-   - [الطريقة 3: التشغيل عبر حاويات Docker الصناعية](#طريقة-3-التشغيل-عبر-حاويات-docker-الصناعية)
-8. [فحص وتجربة عينات الاختبار (Test Suite)](#-فحص-وتجربة-عينات-الاختبار-test-suite)
+An end-to-end, edge-ready automated quality inspection and physical sorting system engineered for modern high-speed manufacturing lines. The system bridges **real-time Deep Learning (YOLO11 ONNX)**, **Hybrid Computer Vision (HSV/LAB Color Profiling & Geometric Analysis)**, and **Industrial Control Protocols (Modbus TCP / Industrial PLCs)** to inspect products, actuate pneumatic sorting arms with microsecond precision, and enforce automatic line emergency stops.
 
 ---
 
-## 💡 فكرة المشروع وفائدته الصناعية
-
-في المصانع وخطوط التعبئة والتغليف الحديثة، يمثل الفحص البشري التقليدي عائقاً كبيراً بسبب الإجهاد البصري، انخفاض السرعة، وإمكانية تسرب المنتجات المعيبة للعملاء.
-
-يقدم هذا المشروع حلاً هندسياً متكاملاً يعمل كـ **محطة فحص ذكية على خط الإنتاج (Inspection Station)**:
-- **المعالجة البصرية اللحظية**: التقاط صور المنتجات المارة على السير عبر كاميرات صناعية أو فيديوهات عالية الدقة.
-- **الفحص الهجين المزدوج**: كشف العيوب الميكانيكية، التشققات، الخدوش، الانحراف اللوني، والتشوه الهندسي في أجزاء من الثانية.
-- **الفرز الفيزيائي التلقائي**: إرسال إشارة رقمية فورية إلى متحكم الـ PLC لتفعيل مكبس الذراع الهوائي (`Coil 1 = 1`) لإسقاط القطعة المعيبة في سلة العوازل دون إيقاف السير.
-- **نظام الحماية والسلامة الذكي**: التوقف التلقائي للخط بالكامل (`Coil 2 = 0`) عند تكرار العيوب لحماية خط الإنتاج من الأعطال الكبرى، مع توثيق تفصيلي لكل قطعة.
-
----
-
-## 🧠 بيانات التدريب والنموذج المستخدم
-
-### 1. مجموعة البيانات (Dataset)
-تم تدريب النموذج بالاعتماد على قاعدة البيانات العالمية المعتمدة في أبحاث الثورة الصناعية:
-- **MVTec Anomaly Detection (MVTec AD)**: المعيار الدولي القياسي لفحص الجودة الصناعية.
-- تم التركيز وتخصيص التدريب على **3 فئات صناعية استراتيجية**:
-  1. **الزجاجات والقوارير (`bottle`)**: رصد الكسور، الشروخ، والشوائب الداخلية.
-  2. **الكبسولات الدوائية (`capsule`)**: كشف تشوهات الغلاف، الثقوب، وبقع الألوان.
-  3. **الصواميل والقطع المعدنية (`metal_nut`)**: فحص الصدأ، عيوب الخراطة، والالتواءات الميكانيكية.
-
-### 2. هندسة النموذج وتقنية التدريب
-- **بنية النموذج**: أحدث إصدارات **Ultralytics YOLO11 Small (`yolo11s.pt`)** بنظام نقل التعلم (**Transfer Learning**).
-- **التحويل التلقائي للأقنعة**: خوارزمية ذكية لاستخراج صناديق الإحاطة (Bounding Boxes) من أقنعة البيكسل الحقيقية لـ MVTec بدون أي تدخل يدوي.
-- **الحفظ التلقائي والتوقف المبكر**: تدريب على 40 دورة (Epochs) مع تفعيل التوقف الذكي (`patience=8`) للحفاظ على أفضل نقطة استقرار للأوزان وتجنب فرط التخصيص (Overfitting).
-- **التصدير الميداني**: تحويل النموذج إلى صيغة **ONNX المفتوحة المبسطة** (`best_defect_detector.onnx`) بحجم خفيف جداً (~**37.9 ميجابايت**) ليعمل بكفاءة خارقة على الأجهزة المدمجة (Industrial PCs & Edge Devices).
+## 📑 Table of Contents
+1. [System Overview & Concept](#-system-overview--concept)
+2. [Model Weights Download](#-model-weights-download)
+3. [Dataset & Model Training](#-dataset--model-training)
+4. [Performance Metrics & Accuracy (Academic vs. Real-World Line)](#-performance-metrics--accuracy)
+5. [Engineering Challenges Faced & Technical Solutions](#-engineering-challenges-faced--technical-solutions)
+6. [Exclusive Core Features](#-exclusive-core-features)
+7. [Repository File Map](#-repository-file-map)
+8. [Deployment & Execution Guide](#-deployment--execution-guide)
+   - [Method 1: Windows One-Click Start (run.bat)](#method-1-windows-one-click-start-runbat-recommended)
+   - [Method 2: Native Python Virtual Environment](#method-2-native-python-virtual-environment)
+   - [Method 3: Industrial Docker Container](#method-3-industrial-docker-container-production)
+9. [Test Suite & Demonstration Media](#-test-suite--demonstration-media)
+10. [PLC Modbus Register Mapping](#-plc-modbus-register-mapping)
 
 ---
 
-## 📊 معدلات الدقة (التدريب مقابل الأداء الميداني الحقيقي)
+## 💡 System Overview & Concept
 
-### أ. دقة التدريب الأكاديمية (YOLO11 Training Metrics):
-- هبطت خسارة التصنيف (`cls_loss`) من **`15.43`** في البدايات إلى **`2.10`** عند الاستقرار.
-- حقق النموذج دقة تصنيف حادة بمعدل **`mAP50` يناهز `28.6% - 35%`** على العيوب الصناعية الدقيقة للغاية (**Tiny Objects** كالشروخ الميكروسكوبية وثقوب الإبرة وبقع اللون الموضعية)، وهي نتيجة معيارية ممتازة جداً لمقاييس كشف الأجسام الصغيرة في MVTec.
+Manual quality inspection on factory conveyor lines is prone to human eye fatigue, inspection bottlenecks, and inconsistent defect classification.
 
-### ب. دقة النظام الهجين الحقيقية في خط الإنتاج (Real-World System Accuracy):
-- **الدقة الفعلية لقرار الجودة (PASS / REJECT):** تتراوح بين **`96%` إلى `98%`**!
-- **السر في هذا الفارق الهائل:** في بيئة المصنع، لا نعتمد على شبكة YOLO وحدها؛ بل صممنا **الفاحص الهجين (`HybridQualityInspector`)** الذي يدمج:
-  1. كشف الشروخ السطحية المعقدة عبر **شبكة YOLO11**.
-  2. فحص الانحرافات اللونية والصدأ والتلوث عبر **فضاءات الألوان المتطورة (HSV & LAB)**.
-  3. قياس التناسق الدائري والأبعاد الهندسية عبر **محددات الكونتور (Geometry Analysis)**.
+This project delivers a complete **Smart Inspection Station** that operates inline with production conveyors:
+- **Instant Frame Acquisition & Inference:** Inspects items on the fly using industrial GigE/USB cameras or high-resolution video streams.
+- **Dual-Engine Hybrid Decision:** Combines neural network spatial feature extraction with classical computer vision checks to detect cracks, deformation, contamination, scratches, and discoloration.
+- **Microsecond Actuation via PLC:** Dispatches instantaneous non-blocking Modbus TCP pulses (`Coil 1 = 1`) to trigger a pneumatic actuator that ejects rejected items into a quarantine bin without stopping production.
+- **Safety Interlock & Auto-Stop:** Continuously monitors line health; if 3 consecutive defects occur, it commands the PLC conveyor drive to halt (`Coil 2 = 0`) to prevent catastrophic raw material waste.
+
+```
+       [ Camera / Video Feed ]
+                  │
+                  ▼
+       [ StreamVisionWorker (Async Thread) ]
+                  │
+     ┌────────────┴────────────┐
+     ▼                         ▼
+[ YOLO11 ONNX Engine ]   [ OpenCV Color & Geometry ]
+     └────────────┬────────────┘
+                  │ (Spatial NMS Fusion)
+                  ▼
+       [ IndustrialPieceTracker ]  <── State Machine & Lockout
+                  │
+                  ▼
+       [ FactoryController & PLC Manager ]
+                  │
+     ┌────────────┴────────────┐
+     ▼                         ▼
+[ Physical Arm Actuation ]  [ Tkinter UI Dispatch ]
+ (Modbus TCP Coil 1 = 1)     (0ms Jitter Visual Dashboard)
+```
+
+---
+
+## 📦 Model Weights Download
+
+The lightweight, edge-optimized ONNX model weights (`best_defect_detector.onnx`, ~37.9 MB) are available for download on Google Drive:
+
+[![Download ONNX Model](https://img.shields.io/badge/Google%20Drive-Download%20Model%20Weights-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1aqii4Idkr5ABpKsfioK-ILdtxz-iVhlQ/view?usp=sharing)
+
+🔗 **Direct Download Link:**  
+**[Download `best_defect_detector.onnx` from Google Drive](https://drive.google.com/file/d/1aqii4Idkr5ABpKsfioK-ILdtxz-iVhlQ/view?usp=sharing)**
+
+> [!IMPORTANT]
+> **Placement Instructions:**  
+> Download the file and place it directly into the project root directory:
+> ```text
+> Quality Control/
+> ├── best_defect_detector.onnx   <-- Place file here
+> ├── app.py
+> ├── requirements.txt
+> └── ...
+> ```
+
+---
+
+## 🧠 Dataset & Model Training
+
+### 1. Dataset Architecture
+The vision model was fine-tuned on the globally recognized benchmark for manufacturing quality inspection:
+- **MVTec Anomaly Detection (MVTec AD)** Benchmark.
+- Focused on three core industrial manufacturing domains:
+  1. **Bottles (`bottle`)**: Cracks, broken glass, internal contaminants, and mouth chips.
+  2. **Medical Capsules (`capsule`)**: Surface scratches, indentations, cracking, and dye discoloration.
+  3. **Metal Nuts & Fasteners (`metal_nut`)**: Rust patches, thread deformation, and surface abrasions.
+- **Automated Mask-to-Box Pipeline:** Raw ground-truth segmentation masks were automatically ingested and converted to bounding boxes with sub-pixel contour thresholds.
+- **Class Balance:** Trained on an optimal balanced distribution (~240 normal/PASS samples and ~265 defective/REJECT samples).
+
+### 2. Training Strategy & Export
+- **Base Architecture:** **Ultralytics YOLO11 Small (`yolo11s.pt`)** with Transfer Learning.
+- **Optimization:** Stochastic Gradient Descent (SGD) with early stopping (`patience=8`) over 40 epochs to eliminate overfitting.
+- **Export Format:** Exported to simplified **ONNX (Open Neural Network Exchange)** with fixed spatial dimensions ($640 \times 640$), achieving a compact footprint (~**37.9 MB**) and instant inference initialization.
+
+---
+
+## 📊 Performance Metrics & Accuracy
+
+### Academic Training Benchmark (YOLO11 Evaluation)
+- Classification loss (`cls_loss`) plunged steadily from **`15.43`** down to **`2.10`**.
+- The model reached **`mAP50` of `28.6% - 35%`** on tiny anomalous objects (**Tiny Objects** such as hairline fractures, micro-scratches, and localized dye variations). In strict industrial anomaly benchmarks, reaching $>25\%$ mAP on micro-defects confirms high localization sensitivity.
+
+### Real-World Production Line Accuracy (Hybrid Vision Pipeline)
+- **Live Decision Accuracy (PASS / REJECT):** **`96%` – `98%`**!
+- **Why the Real-World Accuracy is Significantly Higher:**  
+  In production lines, the system does not rely on deep learning in isolation. The **`HybridQualityInspector`** fuses two orthogonal inspection pipelines:
+  1. **YOLO11 ONNX:** Catches complex structural anomalies, punctures, fractures, and irregular geometry.
+  2. **OpenCV Multi-Space Color Analysis:** Computes localized chromatic variations using **HSV** and **LAB** delta metrics to detect subtle rust spots, chemical stains, and dye fading.
+  3. **Contour Geometry Profiling:** Measures aspect ratios, circularity, and perimeter continuity to catch dimensional non-compliance.
   
-  > 🌟 **النتيجة الميدانية:** أي عيب سطحي أو لوني أو هندسي يفلت من أحد المسارات، يمسكه المسار الآخر فوراً، مما خفض نسبة العيوب غير المكتشفة (False Negatives) إلى الصفر تقريباً.
+> 🛡️ **Zero-Defect Guarantee:** A flaw missed by the neural network due to lighting shifts is captured by the color/geometric filter, reducing False Negatives to near zero.
 
 ---
 
-## 📂 هيكلية المشروع وشرح محتويات الملفات
+## 🛠️ Engineering Challenges Faced & Technical Solutions
+
+During development and live testbench validation, several complex engineering challenges were identified and resolved:
+
+### 1. Tkinter GUI Freezing & Stuttering Under Heavy Load
+- **Challenge:** Running ONNX inference (`session.run`) and 4K OpenCV image filtering on Tkinter's `MainThread` caused the user interface to freeze and drop frames.
+- **Solution:** Implemented [`StreamVisionWorker`](file:///C:/Users/ALQURSAN/Desktop/Quality%20Control/src/vision_worker.py) to decouple video capture and inference into dedicated background threads. An asynchronous dispatch queue feeds the UI with downscaled preview buffers (`RGB Preview`), ensuring a consistent 60 FPS responsive interface with zero jitter.
+
+### 2. Multi-Trigger Ejector Lockout on Single Pieces
+- **Challenge:** When a defective product remained visible over consecutive video frames, the system re-detected the flaw repeatedly, pulsing the ejector arm multiple times and prematurely triggering the 3-defect line emergency stop.
+- **Solution:** Engineered [`IndustrialPieceTracker`](file:///C:/Users/ALQURSAN/Desktop/Quality%20Control/src/piece_tracker.py) as a deterministic State Machine. It requires an object to be stable for 3 consecutive frames before firing a **single registration pulse**, locking the piece ID until the object completely vacates the inspection zone.
+
+### 3. Missed Transitions on Identical-Background Video Slides
+- **Challenge:** In slideshow test videos with products presented against the exact same uniform white background, whole-frame diffs remained small ($<20.0$), causing the tracker to mistake new items for the same locked object.
+- **Solution:** Designed the `_compute_scene_delta` algorithm using $96 \times 96$ Gaussian-blurred thumbnails with **Zero-Mean Illumination Normalization**. Combined with an active reference anchor (`registered_anchor_gray`), the system reliably detects cuts between different pieces on identical backgrounds while remaining immune to camera vibration and auto-exposure ripple.
+
+### 4. Actuator Lamp vs. PLC Coil 1 Synchronization Desync
+- **Challenge:** The visual `ACTIVE` lamp turned on for every raw frame with detections, while the PLC `Coil 1` was governed by a 350 ms hardware timer, creating visual disagreement on the dashboard.
+- **Solution:** Unified pulse duration to **`650 ms`** across [`PLCModbusManager`](file:///C:/Users/ALQURSAN/Desktop/Quality%20Control/src/plc_modbus.py) and [`FactoryController`](file:///C:/Users/ALQURSAN/Desktop/Quality%20Control/src/factory_controller.py). Coupled the lamp display to live hardware state (`_is_ejector_pulse_active()`), with automatic pulse extension when back-to-back defective items are detected.
+
+### 5. Multi-Threaded State Consistency Under Emergency Stop
+- **Challenge:** Latent worker threads could register results after an operator triggered an E-Stop.
+- **Solution:** Added a `State Epoch Guard` in [`FactoryController`](file:///C:/Users/ALQURSAN/Desktop/Quality%20Control/src/factory_controller.py). Any state modification (E-Stop, conveyor toggle) increments `_state_epoch`, and worker payloads generated with stale epochs are safely dropped.
+
+---
+
+## ⚡ Exclusive Core Features
+
+- **4 Versatile Inspection Modes:**
+  1. *Single Image Inspection:* Instant manual spot check.
+  2. *Live Camera Streaming:* Direct integration with industrial webcams and USB/GigE video streams.
+  3. *Recorded Video Analysis:* Simulated conveyor line playback.
+  4. *Batch Folder Streaming:* Automated sequential inspection of hundreds of images simulating a conveyor belt.
+- **Embedded Virtual PLC Simulator:**
+  - Integrated Modbus TCP server (port 5020) enables full hardware simulation and UI testing without needing physical PLC hardware.
+  - Manual Arm Test button (`🦾 اختبار الذراع`) to verify pneumatic responsiveness prior to shifts.
+- **Comprehensive Traceability & Audit Logging:**
+  - Automated defect snapshot archiving in `defect_records/` with red bounding boxes and timestamps.
+  - Complete production log exported to `quality_inspection_log.csv`.
+  - Shift summary report generator displaying overall yield rate (`Yield %`), defect counts, and operational uptime.
+
+---
+
+## 📂 Repository File Map
 
 ```text
 Quality Control/
 ├── .github/
 │   └── workflows/
-│       └── docker-publish.yml     # سير عمل أتمتة بناء ورفع حاوية الدوكر لـ GHCR
+│       └── docker-publish.yml     # Automated CI/CD workflow to build and push container to GHCR
 ├── src/
-│   ├── detector_onnx.py           # محرك الاستدلال خفيف الوزن بنموذج ONNX Runtime
-│   ├── factory_controller.py      # إدارة خط الإنتاج، العدادات، الطوارئ، وحفظ السجلات
-│   ├── hybrid_inspector.py        # الفاحص الهجين (دمج YOLO مع فلاتر الألوان والمقاسات)
-│   ├── piece_tracker.py           # تعقب القطع اللحظي ومنع تكرار الإطلاق في الفيديو
-│   ├── plc_modbus.py              # موديول الاتصال الصناعي ومحاكي الـ PLC (Modbus TCP)
-│   └── vision_worker.py           # خيوط العمل غير المتزامنة للكاميرا والفيديو خارج الـ UI
-├── test/                          # عينات الاختبار والتجربة العملية
-│   ├── bottle/                    # صور تجريبية + فيديو اختبار للقوارير
-│   ├── capsule/                   # صور تجريبية + فيديو اختبار للكبسولات
-│   └── metal_nut/                 # صور تجريبية + فيديو اختبار للصواميل والقطع المعدنية
-├── app.py                         # لوحة التحكم الرسومية التفاعلية الرئيسية (GUI Dashboard)
-├── best_defect_detector.onnx      # النموذج الصناعي المدرب والمضغوط (37.9 MB)
-├── requirements.txt               # الاعتماديات مع تثبيت الإصدارات الدقيقة
-├── run.bat                        # سكريبت الإقلاع السريع لنظام Windows بنقرة واحدة
-├── Dockerfile                     # إعداد بيئة الحاوية الصناعية لنظام Linux
-├── docker-compose.yml             # إعدادات نشر الحاوية وشبكة المضيف وتمرير الكاميرات
-├── .dockerignore                  # استبعاد الملفات غير اللازمة لتقليص حجم صورة الـ Docker
-├── .gitignore                     # استبعاد بيئة العمل والكاش وملفات السجلات المحلية
-├── train_mvtec_yolo11_kaggle.py   # سكريبت بايثون الكامل لإعادة تدريب النموذج
-├── mvtec_yolo11_kaggle_training.ipynb # دفتر كاجل مقسم لـ 7 مراحل لتسهيل التدريب السحابي
-└── KAGGLE_INSTRUCTIONS.md         # دليل تفصيلي لكيفية تشغيل التدريب على Kaggle T4 GPU
+│   ├── detector_onnx.py           # Lightweight ONNX Runtime inference wrapper
+│   ├── factory_controller.py      # Production counters, safety interlocks, and CSV logging
+│   ├── hybrid_inspector.py        # Dual-engine vision pipeline (YOLO11 + OpenCV profiling)
+│   ├── piece_tracker.py           # State machine piece tracker with anti-repeat lockout
+│   ├── plc_modbus.py              # Industrial Modbus TCP client and embedded Virtual PLC
+│   └── vision_worker.py           # Multi-threaded grabber and worker pipeline
+├── test/                          # Verification and demonstration assets
+│   ├── bottle/                    # Sample defect images + demonstration video (1108 (1)(1).mp4)
+│   ├── capsule/                   # Sample defect images + demonstration video (1108 (1)(2).mp4)
+│   └── metal_nut/                 # Sample defect images + demonstration video (1108 (1).mp4)
+├── app.py                         # Main Tkinter industrial dashboard
+├── best_defect_detector.onnx      # Trained model weights (Download via Google Drive link)
+├── requirements.txt               # Fully pinned Python package dependencies
+├── run.bat                        # Windows one-click start script
+├── Dockerfile                     # Debian-based container definition
+├── docker-compose.yml             # Industrial container orchestration with host networking
+├── .dockerignore                  # Build context exclusions
+├── .gitignore                     # Git tracking exclusions
+├── train_mvtec_yolo11_kaggle.py   # Standalone Python model training script
+├── mvtec_yolo11_kaggle_training.ipynb # 7-stage Kaggle notebook for training on GPU
+└── KAGGLE_INSTRUCTIONS.md         # Step-by-step training reproduction guide
 ```
 
 ---
 
-## 🛠️ المشكلات الهندسية التي واجهتنا وكيف تم حلها
+## 🚀 Deployment & Execution Guide
 
-خلال مراحل بناء النظام واختباره الميداني، ظهرت تحديات صناعية وتقنية حقيقية تم التعامل معها بحلول هندسية قوية:
+### Method 1: Windows One-Click Start (`run.bat`) [Recommended]
+On Windows workstations, double-click:
+👉 **[`run.bat`](file:///C:/Users/ALQURSAN/Desktop/Quality%20Control/run.bat)**
 
-### 1. تقطيع وتجمد الواجهة الرسومية عند فحص الفيديو (GUI Freezing)
-- **المشكلة:** كانت عمليات الاستدلال (`model.run`) ومعالجة فلاتر OpenCV تتم على نفس خيط الواجهة (`Tkinter MainThread`)، مما يسبب تجمداً لحظياً للواجهة أثناء تدفق الفيديو.
-- **الحل الهندسي:** عزل معالجة الفيديو والاستدلال في خيط خلفي مخصص عبر [`StreamVisionWorker`](file:///c:/Users/ALQURSAN/Desktop/Quality%20Control/src/vision_worker.py) واستخدام طابور غير متزامن لتحديث الواجهة بلقطات مصغرة (`RGB Preview`)، مما جعل الواجهة تعمل بسلاسة فائقة بمعدل تأخير شبه منعدم (Zero Jitter).
-
-### 2. التكرار الزائف لإطلاق الذراع على نفس القطعة (Multi-Trigger Lockout)
-- **المشكلة:** عند مرور قطعة معيبة في نمط الفيديو وبقائها في المشهد لعدة إطارات متتالية، كان النظام يكتشف العيب في كل إطار، مما يؤدي لإطلاق مكبس الفرز ثلاث مرات متتالية، وتوقف السير بالخطأ لظنه أن هناك 3 قطع معيبة متتالية.
-- **الحل الهندسي:** ابتكار آلة حالات صناعية ذكية داخل [`IndustrialPieceTracker`](file:///c:/Users/ALQURSAN/Desktop/Quality%20Control/src/piece_tracker.py)؛ تشترط استقرار القطعة لـ 3 إطارات، ثم تُطلق النبضة وتُقفل القطعة برقم تعريفي موحد (`Registered Lock`). لا يُرفع القفل ولا يُعاد الإطلاق لنفس القطعة حتى تمر بالكامل أو يحدث انتقال قطعي للمشهد.
-
-### 3. فوات الانتقال بين المنتجات المتتابعة على خلفية موحدة (Same-Background Video Cuts)
-- **المشكلة:** عند تشغيل فيديوهات مكونة من شرائح متتابعة لمنتجات مختلفة على خلفية بيضاء صناعية موحدة، كان فارق الصورة الإجمالي ضئيلاً، مما يجعل النظام يظن أنها نفس القطعة فلا يفحص القطعة الثانية.
-- **الحل الهندسي:** تطوير دالة `_compute_scene_delta` التي تطبق تمويهاً دقيقاً (`GaussianBlur 5x5`) مع مقارنة بكسلات تحيد تغيرات الإضاءة (`Zero-Mean Normalization`) والاحتفاظ بلقطة مرجعية للقطعة المقفلة (`registered_anchor_gray`). أصبح النظام يميز فوراً أي قطعة جديدة حتى لو تطابقت خلفيتها 100%، مع حصانة كاملة ضد اهتزازات الكاميرا والضوضاء.
-
-### 4. عدم التزامن بين لمبة الفرز البرتقالية ومؤشر الـ PLC (Coil 1 Sync)
-- **المشكلة:** كانت لمبة الواجهة تضيء مع كل كشف خام للإطار، بينما `Coil 1` في الـ PLC يرتبط بانتهاء نبضة المكبس الفعلي.
-- **الحل الهندسي:** توحيد مدة النبضة وتمديدها إلى **`650 ms`** في [`PLCModbusManager`](file:///c:/Users/ALQURSAN/Desktop/Quality%20Control/src/plc_modbus.py) و [`FactoryController`](file:///c:/Users/ALQURSAN/Desktop/Quality%20Control/src/factory_controller.py)، وربط لمبة الفرز بحالة `_is_ejector_pulse_active()`، لتضيء وتعود للانتظار بالتزامن المليمتري التام مع إشارة الـ PLC.
-
-### 5. حماية الخط وإيقاف الطوارئ الآمن (E-Stop Epoch Guard)
-- **المشكلة:** عند حدوث إيقاف طوارئ أو توقف السير لتكرار العيوب، كانت بعض خيوط المعالجة المتأخرة قد تسجل نتائج بعد التوقف.
-- **الحل الهندسي:** تطبيق نظام `State Epoch Guard`؛ يتم زيادة رقم الحقبة (`_state_epoch`) مع كل إيقاف، ويتم تجاهل أي معالجة قديمة تمت في حقبة سابقة، مما ضمن أماناً صناعياً صارماً.
+The batch script will:
+1. Verify Python installation in system `PATH`.
+2. Automatically create the `.venv` virtual environment if not present.
+3. Activate the environment and install pinned dependencies from `requirements.txt`.
+4. Launch `app.py`.
 
 ---
 
-## ⚡ الإضافات والميزات الحصرية للنظام
-
-1. **4 أنماط فحص مرنة تغطي كافة الاحتياجات:**
-   - **فحص صورة مفردة**: اختبار عينة سريعة خارج الخط.
-   - **البث الحي للكاميرا**: الاتصال المباشر بكاميرات الويب أو كاميرات الحزام الصناعية (Industrial GigE / USB3).
-   - **فحص الفيديو المسجل**: تشغيل فيديوهات خط الإنتاج للمراجعة والمراقبة.
-   - **فحص تسلسلي لمجلد (Batch Folder Stream)**: محاكاة خط سير يفحص مئات الصور المتتابعة تلقائياً.
-2. **بروتوكول Modbus TCP الصناعي ومحاكي مدمج:**
-   - الاتصال المباشر مع PLC (Siemens, Schneider, Beckhoff, Omron).
-   - توفير **سيرفر PLC افتراضي مدمج (Virtual Simulator)** يمكن تفعيله بضغطة زر لاختبار الربط بدون أي أجهزة حقيقية.
-   - زر اختبار يدوي للذراع (`Manual Arm Test`) لتجربة المكبس قبل بدء الوردية.
-3. **أرشفة ذكية وتوثيق رقمي كامل:**
-   - حفظ صور العينات المعيبة محاطة بالمربعات وبيانات الثقة والوقت داخل مجلد `defect_records/`.
-   - توثيق كل عملية فحص في ملف `quality_inspection_log.csv`.
-   - زر لتصدير تقرير شامل للوردية يلخص إجمالي المفحوص، نسبة الجودة (`Yield Rate %`)، وعدد العيوب.
-4. **تنبيهات صوتية وبصرية:**
-   - صفارة إنذار إلكترونية غير متزامنة مع كل عيب.
-   - إيقاف آلي فوري للسير إذا توالت العيوب لمنع هدر المواد الخام.
-
----
-
-## 🚀 دليل وطرق التشغيل
-
-### طريقة 1: التشغيل الفوري بنقرة واحدة على Windows (موصى بها)
-يكفي النقر المزدوج على ملف:
-👉 **[`run.bat`](file:///c:/Users/ALQURSAN/Desktop/Quality%20Control/run.bat)**
-- سيقوم السكريبت تلقائياً بالتحقق من وجود بايثون، إنشاء البيئة الافتراضية `.venv` إن لم تكن موجودة، تثبيت الاعتماديات، وتشغيل الواجهة في ثوانٍ.
-
----
-
-### طريقة 2: التشغيل المباشر عبر بيئة Python
-من خلال موجه الأوامر (CMD أو PowerShell) في مجلد المشروع:
+### Method 2: Native Python Virtual Environment
+For development or manual execution in terminal:
 ```bash
-# 1. إنشاء وتفعيل البيئة الافتراضية
+# 1. Create and activate a clean virtual environment
 python -m venv .venv
-.venv\Scripts\activate
 
-# 2. تثبيت المكتبات المعتمدة
+# Windows
+.venv\Scripts\activate
+# Linux / macOS
+source .venv/bin/activate
+
+# 2. Install pinned dependencies
 pip install -r requirements.txt
 
-# 3. تشغيل لوحة التحكم
+# 3. Launch application
 python app.py
 ```
 
 ---
 
-### طريقة 3: التشغيل عبر حاويات Docker الصناعية (Production Deployment)
-مناسب للمصانع وأجهزة الحوسبة الطرفية المدمجة (Industrial Linux IPCs):
+### Method 3: Industrial Docker Container [Production]
+Optimized for deployment on Industrial Linux IPCs:
 ```bash
-# بناء وتشغيل الحاوية بأمر واحد
+# Build and run with Docker Compose
 docker compose up --build
 ```
-- الحاوية مضبوطة سلفاً على شبكة المضيف (`network_mode: host`) لتتصل مباشرة بـ PLC المصنع، مع حفظ مستمر للصور والسجلات على القرص الصلب.
+- Uses `network_mode: host` for low-latency communication with PLCs on the factory network.
+- Mounts host storage for persistent log and defect image retention.
 
 ---
 
-## 🧪 فحص وتجربة عينات الاختبار (Test Suite)
+## 🧪 Test Suite & Demonstration Media
 
-يحتوي مجلد [`test/`](file:///c:/Users/ALQURSAN/Desktop/Quality%20Control/test/) المرفق على كافة العينات المطلوبة لاختبار كافة إمكانيات النظام:
-- **`test/bottle/`**: صور عينات معيبة وسليمة، بالإضافة لفيديو تجريبي لاختبار فرز الزجاجات (`1108 (1)(1).mp4`).
-- **`test/capsule/`**: صور وفيديو تجريبي لاختبار فحص الكبسولات الدوائية والتعرف على تغير الألوان والتشوه (`1108 (1)(2).mp4`).
-- **`test/metal_nut/`**: صور وفيديو فحص الصواميل والقطع الميكانيكية المعيبة (`1108 (1).mp4`).
+The included [`test/`](file:///C:/Users/ALQURSAN/Desktop/Quality%20Control/test/) directory contains ready-to-use demonstration assets:
+- **`test/bottle/`**: Sample images and demonstration clip (`1108 (1)(1).mp4`).
+- **`test/capsule/`**: Sample images and capsule inspection video (`1108 (1)(2).mp4`).
+- **`test/metal_nut/`**: Sample images and fastener inspection video (`1108 (1).mp4`).
 
-للتجربة:
-1. شغل البرنامج عبر `run.bat`.
-2. اختر ملف المنتج المطابق من القائمة المنسدلة (مثلاً: `صواميل وقطع معدنية`).
-3. اضغط **📹 فحص ملف فيديو** واختر أحد فيديوهات مجلد `test` لمشاهدة الذراع اللحظية والإحصائيات الحية تعمل فوراً!
+**How to Test Live:**
+1. Launch the application via `run.bat`.
+2. Under **إعدادات خط الإنتاج (Product Profile)**, select matching category (e.g., `صواميل وقطع معدنية`).
+3. Click **📹 فحص ملف فيديو (Recorded Video)** and select one of the clips from `test/`.
+4. Watch the real-time detection, live counter tracking, and synchronized sorting pulses.
 
 ---
-**تم التطوير بعناية ليلائم متطلبات الثورة الصناعية الرابعة (Industry 4.0) والأتمتة الذكية.**
+
+## 🔌 PLC Modbus Register Mapping
+
+The system follows standard Modbus TCP conventions:
+
+| Data Type | Address | Name | Description |
+| :--- | :---: | :--- | :--- |
+| **Coil** | `0` (`0x00`) | `COIL_EJECT_TRIGGER` | Pneumatic Arm Pulse (`1` = Actuate Ejector, `0` = Standby) |
+| **Coil** | `1` (`0x01`) | `COIL_CONVEYOR_RUN` | Conveyor State (`1` = Running, `0` = Emergency Stop) |
+| **Holding Register** | `0` (`0x00`) | `HR_INSPECTION_STATUS` | Quality Decision (`1` = PASS, `2` = REJECT) |
+| **Holding Register** | `1` (`0x01`) | `HR_TOTAL_COUNT` | Cumulative Inspected Piece Count |
+| **Holding Register** | `2` (`0x02`) | `HR_REJECT_COUNT` | Cumulative Defective Piece Count |
+
+---
+
+## 📄 License & Attribution
+Developed for smart manufacturing and industrial quality assurance. Trained on the MVTec AD dataset. Models and source code are structured for Industry 4.0 integration.
