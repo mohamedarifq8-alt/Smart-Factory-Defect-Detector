@@ -62,6 +62,9 @@ This project delivers a complete **Smart Inspection Station** that operates inli
 ```
 
 ---
+<img width="500" height="500" alt="Screenshot 1" src="https://github.com/mohamedarifq8-alt/Smart-Factory-Defect-Detector/blob/main/test/Screenshot%201%20(1).png?raw=true" />
+
+<img width="500" height="500" alt="Screenshot 2" src="https://github.com/mohamedarifq8-alt/Smart-Factory-Defect-Detector/blob/main/test/Screenshot%201%20(2).png?raw=true" />
 
 ## 📦 Model Weights Download
 
@@ -120,6 +123,9 @@ The vision model was fine-tuned on the globally recognized benchmark for manufac
   
 > 🛡️ **Zero-Defect Guarantee:** A flaw missed by the neural network due to lighting shifts is captured by the color/geometric filter, reducing False Negatives to near zero.
 
+<img width="500" height="500" alt="Screenshot 3" src="https://github.com/mohamedarifq8-alt/Smart-Factory-Defect-Detector/blob/main/test/Screenshot%202%20(1).png?raw=true" />
+
+<img width="500" height="500" alt="Screenshot 4" src="https://github.com/mohamedarifq8-alt/Smart-Factory-Defect-Detector/blob/main/test/Screenshot%202%20(2).png?raw=true" />
 ---
 
 ## 🛠️ Engineering Challenges Faced & Technical Solutions
@@ -269,6 +275,13 @@ The system follows standard Modbus TCP conventions:
 | **Holding Register** | `0` (`0x00`) | `HR_INSPECTION_STATUS` | Quality Decision (`1` = PASS, `2` = REJECT) |
 | **Holding Register** | `1` (`0x01`) | `HR_TOTAL_COUNT` | Cumulative Inspected Piece Count |
 | **Holding Register** | `2` (`0x02`) | `HR_REJECT_COUNT` | Cumulative Defective Piece Count |
+
+---
+
+## 👨‍💻 Author
+**Mohammed Arif Mahyoub Haider**
+
+*Electrical Engineer - Computer and Industrial Control*
 
 ---
 
